@@ -11,6 +11,7 @@ public class Omicron43Reliquary implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		LOGGER.info("THE ABYSS RETURNS EVEN THE BOLDEST OF GAZES");
+		LOGGER.info("Omicron43's Reliqaury initialized");
+		LOGGER.info("BTW Vel'koz #1");
 	}
 }
