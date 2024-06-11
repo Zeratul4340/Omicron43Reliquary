@@ -1,5 +1,6 @@
 package com.omicron43.reliquarymod.effect;
 
+import com.omicron43.reliquarymod.entity.damage.ModDamageTypes;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
@@ -18,7 +19,7 @@ public class DisintegrationStatusEffect extends StatusEffect {
     public boolean applyUpdateEffect(LivingEntity entity, int amplifier) {
         if (entity instanceof LivingEntity) {
             if (amplifier >= 5){
-                entity.damage(entity.getDamageSources().outOfWorld(), (entity.getMaxHealth() * 9999f));
+                entity.damage(ModDamageTypes.of(entity, ModDamageTypes.DISINTEGRATION), (entity.getMaxHealth() * 9999f));
             }
         }
         return true;

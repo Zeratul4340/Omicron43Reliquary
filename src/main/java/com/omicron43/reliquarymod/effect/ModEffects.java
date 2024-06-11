@@ -9,7 +9,8 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 
 public class ModEffects {
-    public static final RegistryEntry<StatusEffect> DISINTEGRATION = ModEffects.registerStatusEffect("disintegration", new DisintegrationStatusEffect(StatusEffectCategory.HARMFUL, 303030));
+    public static final RegistryEntry<StatusEffect> DISINTEGRATION = ModEffects.registerStatusEffect("disintegration",
+            new DisintegrationStatusEffect(StatusEffectCategory.HARMFUL, 303030));
 
     public static RegistryEntry<StatusEffect> registerStatusEffect(String id, StatusEffect statusEffect) {
         return Registry.registerReference(Registries.STATUS_EFFECT, new Identifier(Omicron43Reliquary.MOD_ID, id), statusEffect);
