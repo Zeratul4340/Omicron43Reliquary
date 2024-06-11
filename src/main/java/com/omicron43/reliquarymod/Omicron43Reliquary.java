@@ -1,5 +1,6 @@
 package com.omicron43.reliquarymod;
 
+import com.omicron43.reliquarymod.effect.ModEffects;
 import net.fabricmc.api.ModInitializer;
 
 import org.slf4j.Logger;
@@ -11,6 +12,8 @@ public class Omicron43Reliquary implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		LOGGER.info("THE ABYSS RETURNS EVEN THE BOLDEST OF GAZES");
+		LOGGER.info("Omicron43's Reliquary initialized");
+
+		ModEffects.registerEffects();
 	}
 }
