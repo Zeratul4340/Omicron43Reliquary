@@ -1,4 +1,4 @@
-package com.omicron43.reliquarymod.mixin;
+package net.omicron43.reliquarymod.mixin;
 
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;

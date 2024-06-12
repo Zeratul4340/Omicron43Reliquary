@@ -3,7 +3,7 @@
 	"package": "com.omicron43.reliquarymod.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ExampleMixin"
+      "net.omicron43.reliquarymod.mixin.ExampleMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

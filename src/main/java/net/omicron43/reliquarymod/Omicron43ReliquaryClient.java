@@ -1,4 +1,4 @@
-package com.omicron43.reliquarymod;
+package net.omicron43.reliquarymod;
 
 import net.fabricmc.api.ClientModInitializer;
 

@@ -1,6 +1,6 @@
-package com.omicron43.reliquarymod;
+package net.omicron43.reliquarymod;
 
-import com.omicron43.reliquarymod.effect.ModEffects;
+import net.omicron43.reliquarymod.effect.ModEffects;
 import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.util.Identifier;

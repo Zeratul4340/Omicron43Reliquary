@@ -1,6 +1,6 @@
-package com.omicron43.reliquarymod.effect;
+package net.omicron43.reliquarymod.effect;
 
-import com.omicron43.reliquarymod.Omicron43Reliquary;
+import net.omicron43.reliquarymod.Omicron43Reliquary;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.registry.Registries;

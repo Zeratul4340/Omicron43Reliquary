@@ -16,13 +16,13 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-          "com.omicron43.reliquarymod.Omicron43Reliquary"
+          "net.omicron43.reliquarymod.Omicron43Reliquary"
 		],
 		"client": [
-          "com.omicron43.reliquarymod.Omicron43ReliquaryClient"
+          "net.omicron43.reliquarymod.Omicron43ReliquaryClient"
 		],
 		"fabric-datagen": [
-			"com.omicron43.reliquarymod.Omicron43ReliquaryDataGenerator"
+          "net.omicron43.reliquarymod.Omicron43ReliquaryDataGenerator"
 		]
 	},
 	"mixins": [
