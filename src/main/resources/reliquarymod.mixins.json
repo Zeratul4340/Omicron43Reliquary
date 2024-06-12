@@ -1,9 +1,10 @@
 {
 	"required": true,
-	"package": "com.omicron43.reliquarymod.mixin",
+	"package": "net.omicron43.reliquarymod.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-      "net.omicron43.reliquarymod.mixin.ExampleMixin"
+		"ExampleMixin",
+		"DamageSourcesMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

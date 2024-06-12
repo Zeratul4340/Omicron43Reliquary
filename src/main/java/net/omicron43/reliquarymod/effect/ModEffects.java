@@ -6,14 +6,13 @@ import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
 
 public class ModEffects {
     public static final RegistryEntry<StatusEffect> DISINTEGRATION = ModEffects.registerStatusEffect("disintegration",
-            new DisintegrationStatusEffect(StatusEffectCategory.HARMFUL, 303030));
+            new EmptyStatusEffect(StatusEffectCategory.HARMFUL, 0x303030));
 
     public static RegistryEntry<StatusEffect> registerStatusEffect(String id, StatusEffect statusEffect) {
-        return Registry.registerReference(Registries.STATUS_EFFECT, new Identifier(Omicron43Reliquary.MOD_ID, id), statusEffect);
+        return Registry.registerReference(Registries.STATUS_EFFECT, Omicron43Reliquary.id(id), statusEffect);
     }
 
 

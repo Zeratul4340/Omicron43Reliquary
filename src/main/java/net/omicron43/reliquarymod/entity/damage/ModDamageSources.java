@@ -21,5 +21,5 @@ public class ModDamageSources {
         this.disintegration = damageSources.create(DISINTEGRATION);
     }
 
-    public DamageSource disintegration(){return this.disintegration;}
+    public DamageSource disintegration(){return disintegration;}
 }
