@@ -4,6 +4,8 @@ import net.omicron43.reliquarymod.effect.ModEffects;
 import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.util.Identifier;
+import net.omicron43.reliquarymod.item.ModItemGroups;
+import net.omicron43.reliquarymod.item.ModItems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,5 +23,7 @@ public class Omicron43Reliquary implements ModInitializer {
 		LOGGER.info("Omicron43's Reliquary initialized");
 
 		ModEffects.registerEffects();
+		ModItems.registerModItems();
+		ModItemGroups.registerItemGroups();
 	}
 }
