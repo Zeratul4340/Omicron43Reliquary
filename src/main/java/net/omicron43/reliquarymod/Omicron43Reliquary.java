@@ -13,7 +13,7 @@ public class Omicron43Reliquary implements ModInitializer {
 
 	//cool method from doctor4t and the Ladysnake org at large
 	public static Identifier id(String path) {
-		return new Identifier(MOD_ID, path);
+		return Identifier.of(MOD_ID, path);
 	}
 
 		@Override
