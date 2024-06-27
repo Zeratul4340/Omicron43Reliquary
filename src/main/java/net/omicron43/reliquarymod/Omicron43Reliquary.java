@@ -11,7 +11,7 @@ public class Omicron43Reliquary implements ModInitializer {
 	public static final String MOD_ID = "reliquarymod";
     public static final Logger LOGGER = LoggerFactory.getLogger("reliquarymod");
 
-	//cool method from doctor4t and the Ladysnake org at large
+	//Additional proofreading by the koolkid94 guy (very cool)
 	public static Identifier id(String path) {
 		return Identifier.of(MOD_ID, path);
 	}
