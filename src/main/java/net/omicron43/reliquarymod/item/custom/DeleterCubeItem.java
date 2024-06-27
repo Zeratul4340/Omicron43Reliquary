@@ -25,6 +25,7 @@ public final class DeleterCubeItem extends Item implements GeoItem {
     public int getMaxUseTime(ItemStack stack, LivingEntity user) {
         return 1048576;
     }
+    public boolean alreadyStartedUsing = false;
 
     private static final RawAnimation IDLE = RawAnimation.begin().thenPlay("animation.deleter_cube.idle");
     private static final RawAnimation ATTACK_START = RawAnimation.begin().thenPlay("animation.deleter_cube.attack_start");
@@ -77,7 +78,10 @@ public final class DeleterCubeItem extends Item implements GeoItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         if (world instanceof ServerWorld serverWorld) {
-            triggerAnim(player, GeoItem.getOrAssignId(player.getActiveItem(), serverWorld), "on_attack_controller","attack_start");
+            if (!alreadyStartedUsing) {
+                triggerAnim(player, GeoItem.getOrAssignId(player.getActiveItem(), serverWorld), "on_attack_controller", "attack_start");
+                alreadyStartedUsing = true;
+            }
             triggerAnim(player, GeoItem.getOrAssignId(player.getActiveItem(), serverWorld), "beam_loop_controller", "beam_loop");
         }
         return super.use(world, player, hand);
@@ -87,10 +91,15 @@ public final class DeleterCubeItem extends Item implements GeoItem {
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (world instanceof ServerWorld serverWorld) {
             triggerAnim(user, GeoItem.getOrAssignId(user.getActiveItem(), serverWorld), "attack_end_controller", "attack_end");
+            alreadyStartedUsing = false;
         }
     }
 
     private PlayState idlePredicate(AnimationState<DeleterCubeItem> deleterCubeItemAnimationState) {
+        if (alreadyStartedUsing) {
+            deleterCubeItemAnimationState.getController().stop();
+            return PlayState.STOP;
+        }
         deleterCubeItemAnimationState.getController().setAnimation(IDLE);
         return PlayState.CONTINUE;
     }
