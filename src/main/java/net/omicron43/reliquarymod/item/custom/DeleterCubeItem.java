@@ -3,33 +3,35 @@ package net.omicron43.reliquarymod.item.custom;
 import net.minecraft.client.render.item.BuiltinModelItemRenderer;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ClickType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import net.omicron43.reliquarymod.client.renderer.item.DeleterCubeRenderer;
-import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.animatable.SingletonGeoAnimatable;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.*;
-import software.bernie.geckolib.mixin.client.BlockEntityWithoutLevelRendererMixin;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.function.Consumer;
 
 public final class DeleterCubeItem extends Item implements GeoItem {
     public int getMaxUseTime(ItemStack stack, LivingEntity user) {
-        return 5;
+        return 19980;
     }
-    int usetime = 0;
-    public boolean alreadyStartedUsing = false;
+
+    public UseAction getUseAction(ItemStack stack) {
+        return UseAction.BOW;
+    }
+
+    int useTime = 0;
+    public boolean StartedUsing = false;
+    public boolean stopUsing = false;
 
     private static final RawAnimation IDLE = RawAnimation.begin().thenPlay("animation.deleter_cube.idle");
     private static final RawAnimation ATTACK_START = RawAnimation.begin().thenPlay("animation.deleter_cube.attack_start");
@@ -49,7 +51,6 @@ public final class DeleterCubeItem extends Item implements GeoItem {
             private DeleterCubeRenderer renderer;
 
             @Override
-            @Nullable
             public BuiltinModelItemRenderer getGeoItemRenderer() {
                 if (this.renderer == null)
                     this.renderer = new DeleterCubeRenderer();
@@ -76,49 +77,34 @@ public final class DeleterCubeItem extends Item implements GeoItem {
                 }));
         controllers.add(new AnimationController<>(this, "attack_end_controller", 0, state -> PlayState.CONTINUE)
                 .triggerableAnim("attack_end", ATTACK_END));
-        controllers.add(new AnimationController<>(this, "idle_controller", 0, this::idlePredicate));
+        controllers.add(new AnimationController<>(this, "idle_controller", 0, this::idlePredicate)
+                .triggerableAnim("idle", IDLE));
     }
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+        ItemStack itemStack = player.getStackInHand(hand);
         if (world instanceof ServerWorld serverWorld) {
-            if (!alreadyStartedUsing /*this means that its starting to be used */ && usetime <= 10) {
-                triggerAnim(player, GeoItem.getOrAssignId(player.getActiveItem(), serverWorld), "on_attack_controller", "attack_start");
-                alreadyStartedUsing = true;
-                usetime++;
-                System.out.println("THE USETIME IS: " + usetime);
-                if(usetime == 10)
-                {
-                    usetime = 0;
-                    use(world,player,hand);
-                    triggerAnim(player, GeoItem.getOrAssignId(player.getActiveItem(), serverWorld), "attack_end_controller", "attack_end");
-                    return super.use(world, player, hand);
-                }
-                return super.use(world, player, hand);
+            if (!StartedUsing /*this means that you JUST pressed "use" */ && useTime <= 100 && useTime > 1) {
+                StartedUsing = true;
+                stopUsing = false;
+                useTime++;
             }
-            else if(alreadyStartedUsing){
-                triggerAnim(player, GeoItem.getOrAssignId(player.getActiveItem(), serverWorld), "attack_end_controller", "attack_end");
-                alreadyStartedUsing = false;
-                usetime = 0;
-                System.out.println("THE USETIME IS: SHOULD BE ZERO BTW  " + usetime);
-                return super.use(world, player, hand);
-            }
-            triggerAnim(player, GeoItem.getOrAssignId(player.getActiveItem(), serverWorld), "idle_controller", "idle");
         }
-        return super.use(world, player, hand);
+        return TypedActionResult.consume(itemStack);
     }
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-
+        System.out.println("Ticks passed: " + useTime);
+        useTime = 0;
+        StartedUsing = false;
+        stopUsing = true;
     }
 
-
-
     private PlayState idlePredicate(AnimationState<DeleterCubeItem> deleterCubeItemAnimationState) {
-        if (alreadyStartedUsing) {
+        if (StartedUsing && !stopUsing) {
             deleterCubeItemAnimationState.getController().stop();
-            return PlayState.STOP;
         }
         deleterCubeItemAnimationState.getController().setAnimation(IDLE);
         return PlayState.CONTINUE;
