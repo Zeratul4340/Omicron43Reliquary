@@ -1,5 +1,7 @@
 {
   "effect.reliquarymod.disintegration": "Disintegration",
   "death.attack.disintegration": "%1$s was de-atomized",
-  "death.attack.disintegration.player": "%1$s was de-atomized by %2$s"
+  "death.attack.disintegration.player": "%1$s was de-atomized by %2$s",
+
+  "item.reliquarymod.deleter_cube": "Handheld Annihilation"
 }

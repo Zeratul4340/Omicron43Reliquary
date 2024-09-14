@@ -20,6 +20,9 @@ public abstract class ItemRendererMixin {
         if (stack.isOf(ModItems.DELETER_CUBE) && renderMode == ModelTransformationMode.GUI) {
             return ((ItemRendererAccessor) this).mccourse$getModels().getModelManager().getModel(new ModelIdentifier(Omicron43Reliquary.id("deleter_cube_2d"), "inventory"));
         }
+        else if (stack.isOf(ModItems.DELETER_CUBE) && renderMode == ModelTransformationMode.FIXED) {
+            return ((ItemRendererAccessor) this).mccourse$getModels().getModelManager().getModel(new ModelIdentifier(Omicron43Reliquary.id("deleter_cube_2d"), "inventory"));
+        }
         return value;
     }
 }
