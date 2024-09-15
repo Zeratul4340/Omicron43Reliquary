@@ -24,11 +24,6 @@ public final class DeleterCubeItem extends Item implements GeoItem {
     public int getMaxUseTime(ItemStack stack, LivingEntity user) {
         return 19980;
     }
-
-    public UseAction getUseAction(ItemStack stack) {
-        return UseAction.BOW;
-    }
-
     int useTime = 0;
     public boolean StartedUsing = false;
     public boolean stopUsing = false;
@@ -63,11 +58,11 @@ public final class DeleterCubeItem extends Item implements GeoItem {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "on_attack_controller", 0, state -> PlayState.CONTINUE)
+        controllers.add(new AnimationController<>(this, "on_attack_controller", 0, state -> PlayState.STOP)
                 .triggerableAnim("attack_start", ATTACK_START));
                 // We've marked the "attack_start" animation as being triggerable from the server
 
-        controllers.add(new AnimationController<>(this, "beam_loop_controller", 0, state -> PlayState.CONTINUE)
+        controllers.add(new AnimationController<>(this, "beam_loop_controller", 0, state -> PlayState.STOP)
                         .triggerableAnim("beam_loop", BEAM_LOOP)                .setSoundKeyframeHandler(state -> {
                     // Use helper method to avoid client-code in common class
                     //PlayerEntity player = ClientUtil.getClientPlayer();
@@ -75,7 +70,7 @@ public final class DeleterCubeItem extends Item implements GeoItem {
                     //if (player != null)
                     //player.playSound(SoundRegistry.JACK_MUSIC, 1, 1);
                 }));
-        controllers.add(new AnimationController<>(this, "attack_end_controller", 0, state -> PlayState.CONTINUE)
+        controllers.add(new AnimationController<>(this, "attack_end_controller", 0, state -> PlayState.STOP)
                 .triggerableAnim("attack_end", ATTACK_END));
         controllers.add(new AnimationController<>(this, "idle_controller", 0, this::idlePredicate)
                 .triggerableAnim("idle", IDLE));
@@ -85,21 +80,25 @@ public final class DeleterCubeItem extends Item implements GeoItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack itemStack = player.getStackInHand(hand);
         if (world instanceof ServerWorld serverWorld) {
-            if (!StartedUsing /*this means that you JUST pressed "use" */ && useTime <= 100 && useTime > 1) {
-                StartedUsing = true;
-                stopUsing = false;
-                useTime++;
+            triggerAnim(player, GeoItem.getOrAssignId(player.getStackInHand(hand), serverWorld), "attack_end_controller", "attack_end_controller");
+        }
+        return super.use(world, player, hand);
+    }
+
+    @Override
+    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+        if (remainingUseTicks >= 0 && user instanceof PlayerEntity playerEntity) {
+            if (world instanceof ServerWorld serverWorld) {
+                triggerAnim(user, GeoItem.getOrAssignId(user.getStackInHand(user.getActiveHand()), serverWorld), "beam_loop_controller", "beam_loop");
             }
         }
-        return TypedActionResult.consume(itemStack);
     }
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        System.out.println("Ticks passed: " + useTime);
-        useTime = 0;
-        StartedUsing = false;
-        stopUsing = true;
+        if (world instanceof ServerWorld serverWorld) {
+            triggerAnim(user, GeoItem.getOrAssignId(user.getStackInHand(user.getActiveHand()), serverWorld), "attack_end_controller", "attack_end");
+        }
     }
 
     private PlayState idlePredicate(AnimationState<DeleterCubeItem> deleterCubeItemAnimationState) {
