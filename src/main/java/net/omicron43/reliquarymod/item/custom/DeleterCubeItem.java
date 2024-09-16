@@ -78,7 +78,7 @@ public final class DeleterCubeItem extends Item implements GeoItem {
     }*/
 
     private PlayState shouldBeIdle(AnimationState<DeleterCubeItem> deleterCubeItemAnimationState) {
-        if (deleterCubeItemAnimationState.isCurrentAnimation(ATTACK_START) || deleterCubeItemAnimationState.isCurrentAnimation(BEAM_LOOP)) {
+        if (deleterCubeItemAnimationState.isCurrentAnimation(BEAM_LOOP)) {
             return PlayState.STOP;
         }
         else {
