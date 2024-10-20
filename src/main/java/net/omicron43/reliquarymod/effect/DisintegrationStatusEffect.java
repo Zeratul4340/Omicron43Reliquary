@@ -3,7 +3,8 @@ package net.omicron43.reliquarymod.effect;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
-import net.minecraft.particle.ParticleEffect;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.omicron43.reliquarymod.server.misc.DamageTypes;
 
 public class DisintegrationStatusEffect extends StatusEffect {
     protected DisintegrationStatusEffect(StatusEffectCategory category, int color) {
@@ -14,7 +15,7 @@ public class DisintegrationStatusEffect extends StatusEffect {
     public boolean applyUpdateEffect(LivingEntity entity, int amplifier) {
         if (entity instanceof LivingEntity) {
             if (amplifier >= 5) {
-                entity.damage(entity.getDamageSources().genericKill(), (entity.getMaxHealth() * 999999f));
+                entity.damage(DamageTypes.disintegrating(entity.getWorld().getRegistryManager()), (entity.getMaxHealth() * 999999f));
             }
         }
         return true;

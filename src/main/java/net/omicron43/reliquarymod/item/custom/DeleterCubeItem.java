@@ -2,10 +2,14 @@ package net.omicron43.reliquarymod.item.custom;
 
 import net.minecraft.client.particle.SonicBoomParticle;
 import net.minecraft.client.render.item.BuiltinModelItemRenderer;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -14,10 +18,16 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.omicron43.reliquarymod.client.renderer.item.DeleterCubeRenderer;
+import net.omicron43.reliquarymod.effect.ModEffects;
+import net.omicron43.reliquarymod.server.misc.DamageTypes;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.animatable.SingletonGeoAnimatable;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
@@ -101,27 +111,68 @@ public final class DeleterCubeItem extends Item implements GeoItem {
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         int i = this.getMaxUseTime(stack, user) - remainingUseTicks;
+        float beamLength = 43F;
         BlockHitResult blockHitResult;
         PlayerEntity player;
-        HitResult target = user.raycast(20, 0, false);
+        HitResult fullBeam = user.raycast(beamLength, 0, false);
+        HitResult entityHitter = ProjectileUtil.getCollision(user, Entity::canBeHitByProjectile, beamLength);
+        //Note: add particles later (Search for "ParticleOptions")
 
         if (remainingUseTicks < 0 || !(user instanceof PlayerEntity)) {
             user.stopUsingItem();
             return;
         }
-        if (user instanceof PlayerEntity) {
-            Vec3d pos = target.getPos();
-            double x = pos.getX();
-            double y = pos.getY();
-            double z = pos.getZ();
-            if (world instanceof ServerWorld serverWorld && user instanceof PlayerEntity) {
-                if (i >= 3) {
-                    triggerAnim(user, GeoItem.getOrAssignId(user.getStackInHand(user.getActiveHand()), serverWorld), "attacking_controller", "beam_loop");
-                }
-                user.sendMessage(Text.literal("ticks passed: " + i));
-                serverWorld.spawnParticles(ParticleTypes.SONIC_BOOM, x, y, z, 5, 0.2, 0.2, 0.2, 0.0);
-                }
+        Vec3d pos = fullBeam.getPos();
+        double x = pos.getX();
+        double y = pos.getY();
+        double z = pos.getZ();
+        Direction blastHitDirection = null;
+        Vec3d blastHitPos = null;
+
+        if (world.isClient) {
+            setRayPosition(stack, x, y, z);
         }
+
+        Box maxAABB = user.getBoundingBox().expand(beamLength);
+        float simRaytrace = 1.0F;
+        Vec3d startClip = user.getEyePos();
+        while (simRaytrace < beamLength) {
+            startClip = startClip.add(user.getRotationVec(1.0F));
+            Vec3d endClip = startClip.add(user.getRotationVec(1.0F));
+            HitResult hitScanner = ProjectileUtil.getEntityCollision(world, user, startClip, endClip, maxAABB, Entity::canBeHitByProjectile);
+            if (hitScanner != null) {
+                entityHitter = hitScanner;
+                break;
+            }
+            simRaytrace++;
+        }
+        if (entityHitter instanceof EntityHitResult entityHitResult) {
+            blastHitPos = entityHitResult.getEntity().getPos();
+            blastHitDirection = Direction.UP;
+        }
+        if (blastHitPos != null && i % 2 == 0) {
+            float offset = 0.05F + world.random.nextFloat() * 0.09F;
+            Vec3d particleVec = blastHitPos.add(offset * blastHitDirection.getOffsetX(), offset * blastHitDirection.getOffsetY(), offset * blastHitDirection.getOffsetZ());
+            world.addParticle(ParticleTypes.SONIC_BOOM, particleVec.x, particleVec.y, particleVec.z, blastHitDirection.getId(), 0, 0);
+        }
+
+        if (world instanceof ServerWorld serverWorld && user instanceof PlayerEntity) {
+            if (i >= 3) {
+                triggerAnim(user, GeoItem.getOrAssignId(user.getStackInHand(user.getActiveHand()), serverWorld), "attacking_controller", "beam_loop");
+            }
+            Box hitBox = new Box(x-1, y-1, z-1, x+1, y+1, z+1);
+            for (Entity entity : world.getOtherEntities(user, hitBox, Entity::canBeHitByProjectile)) {
+                if (!entity.isPartOf(user) && !entity.isTeammate(user) && !user.isTeammate(entity) && !user.isConnectedThroughVehicle(entity)) {
+                    entity.damage(DamageTypes.disintegrating(world.getRegistryManager()), 1.0F);
+                    if(entity instanceof LivingEntity target) {
+
+                        target.addStatusEffect(new StatusEffectInstance(ModEffects.DISINTEGRATION, 800, 1));
+                    }
+                }
+            }
+            /*serverWorld.spawnParticles(ParticleTypes.SONIC_BOOM, x, y, z, 5, 0.2, 0.2, 0.2, 0.0);*/
+        }
+
     }
 
     @Override
@@ -137,5 +188,46 @@ public final class DeleterCubeItem extends Item implements GeoItem {
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return this.cache;
+    }
+
+    public static int getUseTime(ItemStack stack) {
+        NbtCompound compound = (NbtCompound) stack.streamTags();
+        return compound != null ? compound.getInt("UseTime") : 0;
+    }
+
+    public static void setRayPosition(ItemStack stack, double x, double y, double z) {
+        NbtCompound tag = (NbtCompound) stack.streamTags();
+        Vec3d prev = getRayPosition(stack);
+        tag.putDouble("PrevRayX", prev.x);
+        tag.putDouble("PrevRayY", prev.y);
+        tag.putDouble("PrevRayZ", prev.z);
+        tag.putDouble("RayX", x);
+        tag.putDouble("RayY", y);
+        tag.putDouble("RayZ", z);
+    }
+
+    public static Vec3d getRayPosition(ItemStack stack) {
+        NbtCompound compoundtag = (NbtCompound) stack.streamTags();
+        if (compoundtag != null && compoundtag.contains("RayX")) {
+            return new Vec3d(compoundtag.getDouble("RayX"), compoundtag.getDouble("RayY"), compoundtag.getDouble("RayZ"));
+        } else {
+            return Vec3d.ZERO;
+        }
+    }
+
+    @Nullable
+    public static Vec3d getLerpedBeamPosition(ItemStack stack, float f) {
+        NbtCompound compound = (NbtCompound) stack.streamTags();
+        if (compound != null) {
+            double prevX = (float) compound.getDouble("PrevRayX");
+            double x = (float) compound.getDouble("RayX");
+            double prevY = (float) compound.getDouble("PrevRayY");
+            double y = (float) compound.getDouble("RayY");
+            double prevZ = (float) compound.getDouble("PrevRayZ");
+            double z = (float) compound.getDouble("RayZ");
+            return new Vec3d(prevX + f * (x - prevX), prevY + f * (y - prevY), prevZ + f * (z - prevZ));
+        } else {
+            return null;
+        }
     }
 }
