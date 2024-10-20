@@ -9,4 +9,6 @@ public class DeleterCubeRenderer extends GeoItemRenderer<DeleterCubeItem> {
     public DeleterCubeRenderer(){
         super(new DefaultedItemGeoModel<>(Omicron43Reliquary.id("deleter_cube")));
     }
+
+    /*private static final */
 }
