@@ -14,10 +14,9 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import net.omicron43.reliquarymod.Omicron43Reliquary;
+import net.omicron43.reliquarymod.client.component.ModDataComponentTypes;
 import net.omicron43.reliquarymod.client.renderer.ModRenderLayer;
 import net.omicron43.reliquarymod.item.custom.DeleterCubeItem;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
 import software.bernie.geckolib.model.DefaultedItemGeoModel;
 import software.bernie.geckolib.renderer.GeoItemRenderer;
 
@@ -47,32 +46,30 @@ public class DeleterCubeRenderer extends GeoItemRenderer<DeleterCubeItem> {
         float endWidth = 1.3F;
         float startMiddle = 0;
         VertexConsumer ivertexbuilder = consumerProvider.getBuffer(ModRenderLayer.getDeleterCubeBeam(DELETERCUBE_RAY));
-        MatrixStack.Entry matrixstack$entry = matrixStack.peek();
+        MatrixStack.Entry entry = matrixStack.peek();
         matrixStack.push();
-        Matrix4f matrix4f = matrixstack$entry.getPositionMatrix();
-        Matrix3f matrix3f = matrixstack$entry.getNormalMatrix();
 
-        vertex(ivertexbuilder, matrix4f, matrix3f, startMiddle, 0.0F, 0, j, k, l, 0.5F, v);
-        vertex(ivertexbuilder, matrix4f, matrix3f, -endWidth, length, 0, j, k, l, 0.0F, v1);
-        vertex(ivertexbuilder, matrix4f, matrix3f, endWidth, length, 0, j, k, l, 1.0F, v1);
+        vertex(ivertexbuilder, entry, startMiddle, 0.0F, 0, j, k, l, 0.5F, v);
+        vertex(ivertexbuilder, entry, -endWidth, length, 0, j, k, l, 0.0F, v1);
+        vertex(ivertexbuilder, entry, endWidth, length, 0, j, k, l, 1.0F, v1);
 
-        vertex(ivertexbuilder, matrix4f, matrix3f, 0, 0.0F, startMiddle, j, k, l, 0.5F, v);
-        vertex(ivertexbuilder, matrix4f, matrix3f, 0, length, endWidth, j, k, l, 1F, v1);
-        vertex(ivertexbuilder, matrix4f, matrix3f, 0, length, -endWidth, j, k, l, 0F, v1);
+        vertex(ivertexbuilder, entry, 0, 0.0F, startMiddle, j, k, l, 0.5F, v);
+        vertex(ivertexbuilder, entry, 0, length, endWidth, j, k, l, 1F, v1);
+        vertex(ivertexbuilder, entry, 0, length, -endWidth, j, k, l, 0F, v1);
         matrixStack.pop();
         matrixStack.pop();
 
     }
 
-    private static void vertex(VertexConsumer consumer, Matrix4f m4, Matrix3f m3, float x, float y, float z, int i1, int i2, int i3, float u, float v) {
+    private static void vertex(VertexConsumer consumer, MatrixStack.Entry entry, float x, float y, float z, int i1, int i2, int i3, float u, float v) {
         /*tbh I think this should convert m3 into the "Entry" type idk how tho*/
-
-        consumer.vertex(m4, x, y, z)
+        /*this is how you do it i guess^^^^*/
+        consumer.vertex(entry, x, y, z)
                 .color(i1, i2, i3, 255)
                 .texture(u, v)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(240)
-                .normal(0.0F, 1.0F, 0.0F);
+                .normal(entry, 0.0F, 1.0F, 0.0F);
     }
 
     public static void renderBeamsFor(LivingEntity entity, Vec3d beamFrom, MatrixStack matrixStack, VertexConsumerProvider consumerProvider, float partialTick, boolean firstPerson, int firstPersonPass) {
@@ -80,7 +77,7 @@ public class DeleterCubeRenderer extends GeoItemRenderer<DeleterCubeItem> {
             ItemStack stack = entity.getStackInHand(Hand.MAIN_HAND);
             float useDeleterCubeAmount = DeleterCubeItem.getUseTime(stack) / 5f;
             float ageInTicks = entity.age + partialTick;
-            Vec3d rayPosition = DeleterCubeItem.getLerpedBeamPosition(stack, partialTick);
+            Vec3d rayPosition = stack.get(ModDataComponentTypes.RAYCAST_COORDINATES);
             if (rayPosition != null && DeleterCubeItem.getUseTime(stack) >= 3F) {
                 Vec3d gunPos = getGunOffset(entity, partialTick, firstPerson, entity.getMainArm() == Arm.LEFT);
                 Vec3d vec3 = rayPosition.subtract(beamFrom.add(gunPos));

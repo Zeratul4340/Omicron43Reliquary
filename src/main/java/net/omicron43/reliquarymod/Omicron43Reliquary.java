@@ -1,5 +1,6 @@
 package net.omicron43.reliquarymod;
 
+import net.omicron43.reliquarymod.client.component.ModDataComponentTypes;
 import net.omicron43.reliquarymod.effect.ModEffects;
 import net.fabricmc.api.ModInitializer;
 
@@ -25,5 +26,6 @@ public class Omicron43Reliquary implements ModInitializer {
 		ModEffects.registerEffects();
 		ModItems.registerModItems();
 		ModItemGroups.registerItemGroups();
+		ModDataComponentTypes.registerDataComponentTypes();
 	}
 }

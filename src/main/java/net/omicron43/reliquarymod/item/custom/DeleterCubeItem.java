@@ -24,7 +24,9 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.omicron43.reliquarymod.client.component.ModDataComponentTypes;
 import net.omicron43.reliquarymod.client.renderer.item.DeleterCubeRenderer;
+import net.omicron43.reliquarymod.effect.DisintegrationStatusEffect;
 import net.omicron43.reliquarymod.effect.ModEffects;
 import net.omicron43.reliquarymod.server.misc.DamageTypes;
 import org.jetbrains.annotations.Nullable;
@@ -35,6 +37,7 @@ import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.*;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public final class DeleterCubeItem extends Item implements GeoItem {
@@ -129,8 +132,8 @@ public final class DeleterCubeItem extends Item implements GeoItem {
         Direction blastHitDirection = null;
         Vec3d blastHitPos = null;
 
-        if (world.isClient) {
-            setRayPosition(stack, x, y, z);
+        if (!world.isClient) {
+            stack.set(ModDataComponentTypes.RAYCAST_COORDINATES, pos);
         }
 
         Box maxAABB = user.getBoundingBox().expand(beamLength);
@@ -165,8 +168,13 @@ public final class DeleterCubeItem extends Item implements GeoItem {
                 if (!entity.isPartOf(user) && !entity.isTeammate(user) && !user.isTeammate(entity) && !user.isConnectedThroughVehicle(entity)) {
                     entity.damage(DamageTypes.disintegrating(world.getRegistryManager()), 1.0F);
                     if(entity instanceof LivingEntity target) {
-
-                        target.addStatusEffect(new StatusEffectInstance(ModEffects.DISINTEGRATION, 800, 1));
+                        if(target.getStatusEffects() instanceof DisintegrationStatusEffect){
+                            int amp = Objects.requireNonNull(target.getStatusEffect(ModEffects.DISINTEGRATION)).getAmplifier();
+                            target.getStatusEffect(ModEffects.DISINTEGRATION).upgrade(new StatusEffectInstance(ModEffects.DISINTEGRATION, 800, amp+1));
+                        }
+                        else {
+                            target.addStatusEffect(new StatusEffectInstance(ModEffects.DISINTEGRATION, 800, 1));
+                        }
                     }
                 }
             }
@@ -177,11 +185,9 @@ public final class DeleterCubeItem extends Item implements GeoItem {
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        int i = this.getMaxUseTime(stack, user) - remainingUseTicks;
         if (world instanceof ServerWorld serverWorld) {
                 triggerAnim(user, GeoItem.getOrAssignId(user.getStackInHand(user.getActiveHand()), serverWorld), "attacking_controller", "attack_end");
                 ((ServerWorld) world).spawnParticles(ParticleTypes.ANGRY_VILLAGER, user.getX(), user.getY(), user.getZ(), 5, 0.2, 0.2, 0.2, 0.1);
-                user.sendMessage(Text.literal("Stopped using Item"));
         }
     }
 
@@ -193,41 +199,5 @@ public final class DeleterCubeItem extends Item implements GeoItem {
     public static int getUseTime(ItemStack stack) {
         NbtCompound compound = (NbtCompound) stack.streamTags();
         return compound != null ? compound.getInt("UseTime") : 0;
-    }
-
-    public static void setRayPosition(ItemStack stack, double x, double y, double z) {
-        NbtCompound tag = (NbtCompound) stack.streamTags();
-        Vec3d prev = getRayPosition(stack);
-        tag.putDouble("PrevRayX", prev.x);
-        tag.putDouble("PrevRayY", prev.y);
-        tag.putDouble("PrevRayZ", prev.z);
-        tag.putDouble("RayX", x);
-        tag.putDouble("RayY", y);
-        tag.putDouble("RayZ", z);
-    }
-
-    public static Vec3d getRayPosition(ItemStack stack) {
-        NbtCompound compoundtag = (NbtCompound) stack.streamTags();
-        if (compoundtag != null && compoundtag.contains("RayX")) {
-            return new Vec3d(compoundtag.getDouble("RayX"), compoundtag.getDouble("RayY"), compoundtag.getDouble("RayZ"));
-        } else {
-            return Vec3d.ZERO;
-        }
-    }
-
-    @Nullable
-    public static Vec3d getLerpedBeamPosition(ItemStack stack, float f) {
-        NbtCompound compound = (NbtCompound) stack.streamTags();
-        if (compound != null) {
-            double prevX = (float) compound.getDouble("PrevRayX");
-            double x = (float) compound.getDouble("RayX");
-            double prevY = (float) compound.getDouble("PrevRayY");
-            double y = (float) compound.getDouble("RayY");
-            double prevZ = (float) compound.getDouble("PrevRayZ");
-            double z = (float) compound.getDouble("RayZ");
-            return new Vec3d(prevX + f * (x - prevX), prevY + f * (y - prevY), prevZ + f * (z - prevZ));
-        } else {
-            return null;
-        }
     }
 }
