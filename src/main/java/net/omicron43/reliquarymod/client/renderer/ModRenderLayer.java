@@ -14,7 +14,7 @@ public class ModRenderLayer extends RenderLayer {
     public static RenderLayer getDeleterCubeBeam(Identifier resourceLocation) {
         return of("deleter_cube_beam", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, VertexFormat.DrawMode.QUADS, 256, true, true, RenderLayer.MultiPhaseParameters.builder()
                 .texture(new RenderPhase.Texture(resourceLocation, false, false))
-                .program(RenderLayer.ENERGY_SWIRL_PROGRAM)
+                .program(RenderLayer.BEACON_BEAM_PROGRAM)
                 .transparency(TRANSLUCENT_TRANSPARENCY)
                 .cull(DISABLE_CULLING)
                 .lightmap(ENABLE_LIGHTMAP)

@@ -1,5 +1,6 @@
 package net.omicron43.reliquarymod.effect;
 
+import net.minecraft.sound.SoundEvents;
 import net.omicron43.reliquarymod.Omicron43Reliquary;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
@@ -9,7 +10,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 
 public class ModEffects {
     public static final RegistryEntry<StatusEffect> DISINTEGRATION = ModEffects.registerStatusEffect("disintegration",
-            new DisintegrationStatusEffect(StatusEffectCategory.HARMFUL, 14969));
+            new DisintegrationStatusEffect(StatusEffectCategory.HARMFUL, 14969).applySound(SoundEvents.ENTITY_WARDEN_DEATH));
 
     public static RegistryEntry<StatusEffect> registerStatusEffect(String id, StatusEffect statusEffect) {
         return Registry.registerReference(Registries.STATUS_EFFECT, Omicron43Reliquary.id(id), statusEffect);

@@ -168,9 +168,9 @@ public final class DeleterCubeItem extends Item implements GeoItem {
                 if (!entity.isPartOf(user) && !entity.isTeammate(user) && !user.isTeammate(entity) && !user.isConnectedThroughVehicle(entity)) {
                     entity.damage(DamageTypes.disintegrating(world.getRegistryManager()), 1.0F);
                     if(entity instanceof LivingEntity target) {
-                        if(target.getStatusEffects() instanceof DisintegrationStatusEffect){
-                            int amp = Objects.requireNonNull(target.getStatusEffect(ModEffects.DISINTEGRATION)).getAmplifier();
-                            target.getStatusEffect(ModEffects.DISINTEGRATION).upgrade(new StatusEffectInstance(ModEffects.DISINTEGRATION, 800, amp+1));
+                        if(target.hasStatusEffect(ModEffects.DISINTEGRATION)){
+                            int upgradeAmp = Objects.requireNonNull(target.getStatusEffect(ModEffects.DISINTEGRATION)).getAmplifier() + 1;
+                            Objects.requireNonNull(target.getStatusEffect(ModEffects.DISINTEGRATION)).upgrade(new StatusEffectInstance(ModEffects.DISINTEGRATION, 800, upgradeAmp));
                         }
                         else {
                             target.addStatusEffect(new StatusEffectInstance(ModEffects.DISINTEGRATION, 800, 1));
