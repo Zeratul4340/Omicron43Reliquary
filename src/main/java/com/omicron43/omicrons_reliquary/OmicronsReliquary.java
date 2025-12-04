@@ -2,6 +2,7 @@ package com.omicron43.omicrons_reliquary;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -22,8 +23,11 @@ public class OmicronsReliquary
 {
     // Define mod id in a common place for everything to reference
     public static final String MOD_ID = "omicrons_reliquary";
-    // Directly reference a slf4j logger
     private static final Logger LOGGER = LogUtils.getLogger();
+
+    public static ResourceLocation id(String path) {
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    }
 
     public OmicronsReliquary(FMLJavaModLoadingContext context)
     {
