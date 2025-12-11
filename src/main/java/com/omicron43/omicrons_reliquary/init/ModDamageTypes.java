@@ -1,4 +1,4 @@
-package com.omicron43.omicrons_reliquary.misc;
+package com.omicron43.omicrons_reliquary.init;
 
 import com.omicron43.omicrons_reliquary.OmicronsReliquary;
 import net.minecraft.core.Holder;
@@ -16,21 +16,24 @@ public class ModDamageTypes {
 
     public static final ResourceKey<DamageType> DISINTEGRATION = ResourceKey.create(Registries.DAMAGE_TYPE, OmicronsReliquary.id("disintegration"));
 
-    public static DamageSource disintegrating(RegistryAccess registryAccess, @Nullable Entity directEntity, @Nullable Entity attacker) {
-        return new DamageMessages(registryAccess.registry(Registries.DAMAGE_TYPE).get().getHolderOrThrow(DISINTEGRATION), directEntity, attacker);
+    public static DamageSource disintegrating(RegistryAccess registryAccess) {
+        return new DamageMessages(registryAccess.registry(Registries.DAMAGE_TYPE).get().getHolderOrThrow(DISINTEGRATION));
     }
 
     private static class DamageMessages extends DamageSource {
         private int messageCount;
 
+        //Death message for player
         public DamageMessages(Holder.Reference<DamageType> typeReference) {
             super(typeReference);
         }
 
+        //Entity died from source
         public DamageMessages(Holder.Reference<DamageType> typeReference, Entity entity) {
             super(typeReference, entity);
         }
 
+        //attacker kills using source
         public DamageMessages(Holder.Reference<DamageType> typeReference, Entity directEntity, Entity attacker) {
             super(typeReference, directEntity, attacker);
         }
