@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "reliquarymod:item/deleter_cube_2d"
+  }
+}

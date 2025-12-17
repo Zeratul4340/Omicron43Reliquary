@@ -1,6 +1,8 @@
 package com.omicron43.omicrons_reliquary;
 
 import com.mojang.logging.LogUtils;
+import com.omicron43.omicrons_reliquary.init.ModCreativeTabs;
+import com.omicron43.omicrons_reliquary.init.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -33,7 +35,8 @@ public class OmicronsReliquary
     {
         IEventBus modEventBus = context.getModEventBus();
 
-
+        ModCreativeTabs.register(modEventBus);
+        ModItems.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
 
         MinecraftForge.EVENT_BUS.register(this);
@@ -47,9 +50,10 @@ public class OmicronsReliquary
     {
     }
 
-    // Add the omicron43 block item to the building blocks tab
-    private void addCreative(BuildCreativeModeTabContentsEvent event)
-    {
+    private void addCreative(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() == CreativeModeTabs.COMBAT) {
+            event.accept(ModItems.DELETER_CUBE);
+        }
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
