@@ -1,4 +1,4 @@
-package com.omicron43.omicrons_reliquary.item.custom;
+package com.omicron43.omicrons_reliquary.item.relic;
 
 import net.minecraft.world.item.Item;
 import software.bernie.geckolib.animatable.GeoItem;

@@ -38,7 +38,7 @@ public class ModDamageTypes {
             super(typeReference, directEntity, attacker);
         }
 
-        //from Atsuishio's SuperbWarfare
+        //from Mercurows' SuperbWarfare
         @Override
         public Component getLocalizedDeathMessage(LivingEntity pLivingEntity) {
             Entity entity = this.getEntity() == null ? this.getDirectEntity() : this.getEntity();
