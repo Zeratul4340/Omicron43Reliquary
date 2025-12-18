@@ -1,9 +1,7 @@
 package com.omicron43.omicrons_reliquary.item.relic;
 
-import com.omicron43.omicrons_reliquary.capability.LaserHandler;
 import com.omicron43.omicrons_reliquary.client.renderer.item.DeleterCubeRenderer;
 import com.omicron43.omicrons_reliquary.entity.projectile.LaserEntity;
-import com.omicron43.omicrons_reliquary.init.ModEntities;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;

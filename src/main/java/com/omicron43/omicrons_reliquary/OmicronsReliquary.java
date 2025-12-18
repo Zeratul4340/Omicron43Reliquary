@@ -1,16 +1,13 @@
 package com.omicron43.omicrons_reliquary;
 
 import com.mojang.logging.LogUtils;
-import com.omicron43.omicrons_reliquary.client.renderer.entity.LaserEntityRenderer;
 import com.omicron43.omicrons_reliquary.init.ModCreativeTabs;
 import com.omicron43.omicrons_reliquary.init.ModEntities;
-import com.omicron43.omicrons_reliquary.init.ModEntityRenderers;
 import com.omicron43.omicrons_reliquary.init.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
