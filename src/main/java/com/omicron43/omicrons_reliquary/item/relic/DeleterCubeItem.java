@@ -1,7 +1,9 @@
 package com.omicron43.omicrons_reliquary.item.relic;
 
+import com.omicron43.omicrons_reliquary.capability.LaserHandler;
 import com.omicron43.omicrons_reliquary.client.renderer.item.DeleterCubeRenderer;
 import com.omicron43.omicrons_reliquary.entity.projectile.LaserEntity;
+import com.omicron43.omicrons_reliquary.init.ModEntities;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -69,7 +71,13 @@ public class DeleterCubeItem extends Item implements GeoItem {
     public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
         ItemStack itemstack = pPlayer.getItemInHand(pUsedHand);
         pPlayer.startUsingItem(pUsedHand);
-        pPlayer.playSound(SoundEvents.DISPENSER_DISPENSE);
+        LaserEntity laser = new LaserEntity(pLevel, pPlayer, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), (float) ((pPlayer.yHeadRot + 90) * Math.PI/180), (float) (-pPlayer.getXRot() * Math.PI/180), 55);
+        this.laser = laser;
+
+        if(!pLevel.isClientSide) {
+            pPlayer.level().addFreshEntity(laser);
+            pPlayer.playSound(SoundEvents.DISPENSER_DISPENSE);
+        }
         return InteractionResultHolder.consume(itemstack);
     }
 
