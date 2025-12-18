@@ -1,8 +1,10 @@
 package com.omicron43.omicrons_reliquary.item.relic;
 
 import com.omicron43.omicrons_reliquary.client.renderer.item.DeleterCubeRenderer;
+import com.omicron43.omicrons_reliquary.entity.projectile.LaserEntity;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,6 +25,8 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 import java.util.function.Consumer;
 
 public class DeleterCubeItem extends Item implements GeoItem {
+    protected LaserEntity laser;
+
     private static final RawAnimation IDLE = RawAnimation.begin().thenPlay("animation.deleter_cube.idle");
     private static final RawAnimation ATTACK_START = RawAnimation.begin().thenPlay("animation.deleter_cube.attack_start");
     private static final RawAnimation BEAM_LOOP = RawAnimation.begin().thenPlay("animation.deleter_cube.beam_loop");
@@ -31,7 +35,6 @@ public class DeleterCubeItem extends Item implements GeoItem {
 
     public DeleterCubeItem(Properties pProperties) {
         super(pProperties);
-
         SingletonGeoAnimatable.registerSyncedAnimatable(this);
     }
 
@@ -64,8 +67,10 @@ public class DeleterCubeItem extends Item implements GeoItem {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
-        pPlayer.sendSystemMessage(Component.literal("RMB pressed"));
-        return super.use(pLevel, pPlayer, pUsedHand);
+        ItemStack itemstack = pPlayer.getItemInHand(pUsedHand);
+        pPlayer.startUsingItem(pUsedHand);
+        pPlayer.playSound(SoundEvents.DISPENSER_DISPENSE);
+        return InteractionResultHolder.consume(itemstack);
     }
 
     @Override
@@ -75,9 +80,12 @@ public class DeleterCubeItem extends Item implements GeoItem {
     }
 
     @Override
-    public ItemStack finishUsingItem(ItemStack pStack, Level pLevel, LivingEntity pLivingEntity) {
+    public void releaseUsing(ItemStack pStack, Level pLevel, LivingEntity pLivingEntity, int pTimeCharged) {
         pLivingEntity.sendSystemMessage(Component.literal("RMB released"));
-        return super.finishUsingItem(pStack, pLevel, pLivingEntity);
+        if (laser != null) {
+            laser.discard();
+        }
+        super.releaseUsing(pStack, pLevel, pLivingEntity, pTimeCharged);
     }
 
     @Override

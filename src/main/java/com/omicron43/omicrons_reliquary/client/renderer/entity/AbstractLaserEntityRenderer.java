@@ -24,7 +24,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 /*Code based on the efforts of Mercurows' Superb Warfare
 *
-* rendering logic for laserbeams pewpew*/
+* rendering logic for all the laserbeams pewpew*/
 
 @OnlyIn(Dist.CLIENT)
 public abstract class AbstractLaserEntityRenderer<T extends AbstractLaserEntity> extends EntityRenderer<T> {
