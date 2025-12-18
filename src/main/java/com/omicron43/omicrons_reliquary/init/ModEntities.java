@@ -21,4 +21,8 @@ public class ModEntities {
     public static <T extends Entity> RegistryObject<EntityType<T>> register(String name, EntityType.Builder<T> entityTypeBuilder){
         return REGISTRY.register(name, () -> entityTypeBuilder.build(name));
     }
+
+    public static void register(IEventBus eventBus) {
+        REGISTRY.register(eventBus);
+    }
 }
