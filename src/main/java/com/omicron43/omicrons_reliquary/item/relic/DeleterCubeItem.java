@@ -4,6 +4,7 @@ import com.omicron43.omicrons_reliquary.client.renderer.item.DeleterCubeRenderer
 import com.omicron43.omicrons_reliquary.entity.projectile.LaserEntity;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -82,16 +83,16 @@ public class DeleterCubeItem extends Item implements GeoItem {
     @Override
     public void onUseTick(Level pLevel, LivingEntity pLivingEntity, ItemStack pStack, int pRemainingUseDuration) {
         pLivingEntity.sendSystemMessage(Component.literal("RMB holding!!!"));
-        super.onUseTick(pLevel, pLivingEntity, pStack, pRemainingUseDuration);
     }
 
     @Override
     public void releaseUsing(ItemStack pStack, Level pLevel, LivingEntity pLivingEntity, int pTimeCharged) {
         pLivingEntity.sendSystemMessage(Component.literal("RMB released"));
-        if (laser != null) {
-            laser.discard();
+        if (pLevel instanceof ServerLevel serverLevel) {
+            if (laser != null) {
+                laser.discard();
+            }
         }
-        super.releaseUsing(pStack, pLevel, pLivingEntity, pTimeCharged);
     }
 
     @Override
