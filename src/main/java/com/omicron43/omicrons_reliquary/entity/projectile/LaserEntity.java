@@ -9,6 +9,8 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
@@ -17,13 +19,15 @@ import java.util.Optional;
 
 /*actually actually defines the laser entity to be employed by this mod*/
 public class LaserEntity extends AbstractLaserEntity{
+
     public static final double RADIUS = 512;
 
     public LaserEntity(EntityType<? extends LaserEntity> type, Level level) {
         super(type, level, 1);
+        noCulling = true;
     }
 
-    public LaserEntity(Level level, LivingEntity user, double x, double y, double z, float yaw, float pitch, int duration) {
+    public LaserEntity(EntityType<? extends LaserEntity> type, Level level, LivingEntity user, double x, double y, double z, float yaw, float pitch, int duration) {
         super(ModEntities.LASER.get(), level, 1);
         this.user = user;
         this.setYaw(yaw);

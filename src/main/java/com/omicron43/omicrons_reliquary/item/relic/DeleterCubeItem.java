@@ -2,6 +2,7 @@ package com.omicron43.omicrons_reliquary.item.relic;
 
 import com.omicron43.omicrons_reliquary.client.renderer.item.DeleterCubeRenderer;
 import com.omicron43.omicrons_reliquary.entity.projectile.LaserEntity;
+import com.omicron43.omicrons_reliquary.init.ModEntities;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -70,7 +71,7 @@ public class DeleterCubeItem extends Item implements GeoItem {
     public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
         ItemStack itemstack = pPlayer.getItemInHand(pUsedHand);
         pPlayer.startUsingItem(pUsedHand);
-        LaserEntity laser = new LaserEntity(pLevel, pPlayer, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), (float) ((pPlayer.yHeadRot + 90) * Math.PI/180), (float) (-pPlayer.getXRot() * Math.PI/180), 55);
+        LaserEntity laser = new LaserEntity(ModEntities.LASER.get(), pLevel, pPlayer, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), (float) ((pPlayer.yHeadRot + 90) * Math.PI/180), (float) (-pPlayer.getXRot() * Math.PI/180), 55);
         this.laser = laser;
 
         if(!pLevel.isClientSide) {
@@ -82,12 +83,10 @@ public class DeleterCubeItem extends Item implements GeoItem {
 
     @Override
     public void onUseTick(Level pLevel, LivingEntity pLivingEntity, ItemStack pStack, int pRemainingUseDuration) {
-        pLivingEntity.sendSystemMessage(Component.literal("RMB holding!!!"));
     }
 
     @Override
     public void releaseUsing(ItemStack pStack, Level pLevel, LivingEntity pLivingEntity, int pTimeCharged) {
-        pLivingEntity.sendSystemMessage(Component.literal("RMB released"));
         if (pLevel instanceof ServerLevel serverLevel) {
             if (laser != null) {
                 laser.discard();

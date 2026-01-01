@@ -240,6 +240,10 @@ public class AbstractLaserEntity extends Entity implements TraceableEntity {
         return 0.5F;
     }
 
+    public void remove(RemovalReason reason) {
+        super.remove(reason);
+    }
+
     @Override
     public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);

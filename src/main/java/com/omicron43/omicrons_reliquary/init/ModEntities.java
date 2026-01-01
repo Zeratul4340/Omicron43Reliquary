@@ -19,7 +19,7 @@ public class ModEntities {
 
     /*super cool way to register entities by just... doing the supplier thingy here*/
     public static <T extends Entity> RegistryObject<EntityType<T>> register(String name, EntityType.Builder<T> entityTypeBuilder){
-        return REGISTRY.register(name, () -> entityTypeBuilder.build(name));
+        return REGISTRY.register(name, () -> entityTypeBuilder.build(OmicronsReliquary.id(name).toString()));
     }
 
     public static void register(IEventBus eventBus) {
