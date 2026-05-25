@@ -2,6 +2,9 @@ package com.omicron43.omicrons_reliquary.entity.projectile;
 
 import com.omicron43.omicrons_reliquary.init.ModEntities;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -18,41 +21,49 @@ import java.util.List;
 import java.util.Optional;
 
 /*actually actually defines the laser entity to be employed by this mod*/
-public class LaserEntity extends AbstractLaserEntity{
+public class DeleterLaserEntity extends AbstractLaserEntity{
+private static final EntityDataAccessor<Boolean> DATA_IS_PLAYER = SynchedEntityData.defineId(DeleterLaserEntity.class, EntityDataSerializers.BOOLEAN);
+private static final EntityDataAccessor<Integer> DATA_USER = SynchedEntityData.defineId(DeleterLaserEntity.class, EntityDataSerializers.INT);
+    public static final double RADIUS = 20;
 
-    public static final double RADIUS = 512;
+    @OnlyIn(Dist.CLIENT)
+    private Vec3[] attractorPos;
 
-    public LaserEntity(EntityType<? extends LaserEntity> type, Level level) {
-        super(type, level, 1);
-        noCulling = true;
+    public DeleterLaserEntity(EntityType<? extends DeleterLaserEntity> type, Level level) {
+        super(type, level, 20);
+        if (level.isClientSide) {
+            this.attractorPos = new Vec3[]{new Vec3(0, 0, 0)};
+        }
     }
 
-    public LaserEntity(EntityType<? extends LaserEntity> type, Level level, LivingEntity user, double x, double y, double z, float yaw, float pitch, int duration) {
-        super(ModEntities.LASER.get(), level, 1);
-        this.user = user;
-        this.setYaw(yaw);
-        this.setPitch(pitch);
+    public DeleterLaserEntity(Level level, LivingEntity user, double x, double y, double z, int duration) {
+        this(ModEntities.LASER.get(), level);
+        this.setOwner(user);
+        this.setYaw((float) Math.toRadians(user.yHeadRot + 90));
+        this.setPitch((float) Math.toRadians(-user.getXRot()));
         this.setDuration(duration);
         this.setPos(x, y, z);
-        this.calculateEndPos(RADIUS);
+        int id = 0;
+        this.getEntityData().set(DATA_USER, id);
         if (!level().isClientSide) {
             setCasterId(user.getId());
         }
+        this.calculateEndPos(RADIUS);
     }
 
     @Override
     protected void beamTick() {
         if (!this.level().isClientSide) {
-            if (this.user instanceof Player) {
+            if (this.caster instanceof Player) {
                 this.updateWithPlayer();
-            } else if (this.user != null) {
+            } else if (this.caster != null) {
                 this.updateWithEntity(0F, 0.75F);
             }
         }
 
-        if (user != null) {
-            this.yaw = (float) Math.toRadians(user.yHeadRot + 90);
-            this.pitch = (float) -Math.toRadians(user.getXRot());
+        if (caster != null) {
+            this.yaw = (float) Math.toRadians(caster.yHeadRot + 90);
+            this.pitch = (float) -Math.toRadians(caster.getXRot());
         }
 
         if (this.tickCount >= this.getCountDown()) {
@@ -80,7 +91,7 @@ public class LaserEntity extends AbstractLaserEntity{
         } else {
             List<LivingEntity> entities = world.getEntitiesOfClass(LivingEntity.class, new AABB(Math.min(getX(), collidePosX), Math.min(getY(), collidePosY), Math.min(getZ(), collidePosZ), Math.max(getX(), collidePosX), Math.max(getY(), collidePosY), Math.max(getZ(), collidePosZ)).inflate(1, 1, 1));
             for (LivingEntity entity : entities) {
-                if (entity == this.user) {
+                if (entity == this.caster) {
                     continue;
                 }
                 float pad = entity.getPickRadius() + getBaseScale();
@@ -93,7 +104,7 @@ public class LaserEntity extends AbstractLaserEntity{
                 }
             }
 
-            var target = result.getEntities().stream().min(Comparator.comparingDouble(e -> e.distanceToSqr(this.user)));
+            var target = result.getEntities().stream().min(Comparator.comparingDouble(e -> e.distanceToSqr(this.caster)));
             if (target.isPresent()) {
                 collidePosX = target.get().getX();
                 collidePosY = target.get().getY();
@@ -114,11 +125,13 @@ public class LaserEntity extends AbstractLaserEntity{
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
+        this.entityData.define(DATA_IS_PLAYER, true);
+        this.entityData.define(DATA_USER, 0);
     }
 
     @Override
     protected void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
-        if (this.user == null) {
+        if (this.caster == null) {
             discard();
         }
     }
@@ -129,18 +142,18 @@ public class LaserEntity extends AbstractLaserEntity{
     }
 
     private void updateWithPlayer(){
-        this.setYaw((float) Math.toRadians(user.yHeadRot + 90));
-        this.setPitch((float) Math.toRadians(-user.getXRot()));
-        Vec3 vecOffset = user.getLookAngle().normalize().scale(1.25);
-        this.setPos(user.getX() + vecOffset.x(), user.getY() + user.getBbHeight() * 0.5F + vecOffset.y(), user.getZ() + vecOffset.z());
+        this.setYaw((float) Math.toRadians(caster.yHeadRot + 90));
+        this.setPitch((float) Math.toRadians(-caster.getXRot()));
+        Vec3 vecOffset = caster.getLookAngle().normalize().scale(1.25);
+        this.setPos(caster.getX() + vecOffset.x(), caster.getY() + caster.getBbHeight() * 0.5F + vecOffset.y(), caster.getZ() + vecOffset.z());
     }
 
     private void updateWithEntity(float offset, float yOffset){
-        double radians = Math.toRadians(this.user.yHeadRot + 90);
+        double radians = Math.toRadians(this.caster.yHeadRot + 90);
         this.setYaw((float) radians);
-        this.setPitch((float) ((double) (-this.user.getXRot()) * Math.PI / 180.0));
+        this.setPitch((float) ((double) (-this.caster.getXRot()) * Math.PI / 180.0));
         double offsetX = Math.cos(radians) * offset;
         double offsetZ = Math.sin(radians) * offset;
-        this.setPos(this.user.getX() + offsetX, this.user.getY(yOffset), this.user.getZ() + offsetZ);
+        this.setPos(this.caster.getX() + offsetX, this.caster.getY(yOffset), this.caster.getZ() + offsetZ);
     }
 }

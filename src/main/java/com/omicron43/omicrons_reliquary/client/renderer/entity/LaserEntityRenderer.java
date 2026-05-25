@@ -3,7 +3,7 @@ package com.omicron43.omicrons_reliquary.client.renderer.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.omicron43.omicrons_reliquary.OmicronsReliquary;
-import com.omicron43.omicrons_reliquary.entity.projectile.LaserEntity;
+import com.omicron43.omicrons_reliquary.entity.projectile.DeleterLaserEntity;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -17,7 +17,7 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 @OnlyIn(Dist.CLIENT)
-public class LaserEntityRenderer extends AbstractLaserEntityRenderer<LaserEntity> {
+public class LaserEntityRenderer extends AbstractLaserEntityRenderer<DeleterLaserEntity> {
     private boolean playerView;
 
     private static final float TEXTURE_WIDTH = 256;
@@ -30,13 +30,13 @@ public class LaserEntityRenderer extends AbstractLaserEntityRenderer<LaserEntity
     }
 
     @Override
-    public @NotNull ResourceLocation getTextureLocation(@NotNull LaserEntity pEntity) {
+    public @NotNull ResourceLocation getTextureLocation(@NotNull DeleterLaserEntity pEntity) {
         return TEXTURE;
     }
 
     @Override
-    public void render(LaserEntity beam, float entityYaw, float delta, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
-        this.playerView = beam.user instanceof Player && Minecraft.getInstance().player == beam.user
+    public void render(DeleterLaserEntity beam, float entityYaw, float delta, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
+        this.playerView = beam.caster instanceof Player && Minecraft.getInstance().player == beam.caster
                 && Minecraft.getInstance().options.getCameraType() == CameraType.FIRST_PERSON;
 //        if (this.playerView) return;
         super.render(beam, entityYaw, delta, matrixStackIn, bufferIn, packedLightIn);
@@ -59,7 +59,7 @@ public class LaserEntityRenderer extends AbstractLaserEntityRenderer<LaserEntity
     }
 
     @Override
-    protected void renderStart(LaserEntity laser, int frame, PoseStack matrixStackIn, VertexConsumer builder, float delta, int packedLightIn) {
+    protected void renderStart(DeleterLaserEntity laser, int frame, PoseStack matrixStackIn, VertexConsumer builder, float delta, int packedLightIn) {
         if (this.playerView) return;
         super.renderStart(laser, frame, matrixStackIn, builder, delta, packedLightIn);
     }

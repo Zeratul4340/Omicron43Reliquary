@@ -12,7 +12,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.TraceableEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -26,12 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/*Code based on the efforts of Mercurows' Superb Warfare
+/*Code based on the efforts of Mercurows' Superb Warfare and EEEAB
 *
 * This is the projectile entity def for any lasers to be used. Very cool.*/
 
-public class AbstractLaserEntity extends Entity implements TraceableEntity {
-    public LivingEntity user;
+public class AbstractLaserEntity extends AreaEffectEntity {
     public float yaw, pitch;
     public float preYaw, prePitch;
     public double endPosX, endPosY, endPosZ;
@@ -68,12 +66,12 @@ public class AbstractLaserEntity extends Entity implements TraceableEntity {
         this.yo = this.getY();
         this.zo = this.getZ();
         if (this.tickCount == 1 && this.level().isClientSide) {
-            this.user = (LivingEntity) this.level().getEntity(getCasterId());
+            this.caster = (LivingEntity) this.level().getEntity(getCasterId());
         }
 
         this.beamTick();
 
-        if ((!this.on && this.ticker.isStopped()) || (this.user != null && !this.user.isAlive())) {
+        if ((!this.on && this.ticker.isStopped()) || (this.caster != null && !this.caster.isAlive())) {
             this.discard();
         }
         this.ticker.changeTimer(this.on && this.isAccumulating());
@@ -96,11 +94,6 @@ public class AbstractLaserEntity extends Entity implements TraceableEntity {
     protected void beamTick() {
     }
 
-    @Nullable
-    public Entity getOwner() {
-        return user;
-    }
-
     @Override
     public void push(@NotNull Entity entityIn) {
     }
@@ -112,7 +105,7 @@ public class AbstractLaserEntity extends Entity implements TraceableEntity {
 
     @Override
     protected void defineSynchedData() {
-        this.entityData.define(DATA_CASTER_ID, -1);
+        super.defineSynchedData();
         this.entityData.define(DATA_YAW, 0F);
         this.entityData.define(DATA_PITCH, 0F);
         this.entityData.define(DATA_DURATION, 0);
@@ -192,7 +185,7 @@ public class AbstractLaserEntity extends Entity implements TraceableEntity {
         }
         List<LivingEntity> entities = world.getEntitiesOfClass(LivingEntity.class, new AABB(Math.min(getX(), collidePosX), Math.min(getY(), collidePosY), Math.min(getZ(), collidePosZ), Math.max(getX(), collidePosX), Math.max(getY(), collidePosY), Math.max(getZ(), collidePosZ)).inflate(1, 1, 1));
         for (LivingEntity entity : entities) {
-            if (entity == this.user) {
+            if (entity == this.caster) {
                 continue;
             }
             float pad = entity.getPickRadius() + getBaseScale();
@@ -238,15 +231,6 @@ public class AbstractLaserEntity extends Entity implements TraceableEntity {
 
     protected float getBaseScale() {
         return 0.5F;
-    }
-
-    public void remove(RemovalReason reason) {
-        super.remove(reason);
-    }
-
-    @Override
-    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
     }
 
     public static class CustomHitResult {
